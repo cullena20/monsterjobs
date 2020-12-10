@@ -50,18 +50,6 @@ def get_jobs(soup):
             db_jobs.insert_job(conn, cur, title, company, location, link)
 
 
-def get_url(job, location):
-    if job and location:
-        location = location.replace(' ', '-')
-        html_url = f"https://www.monster.com/jobs/search/?q={job}&where={location}"
-    elif location and not job:
-        location = location.replace(' ', '-')
-        html_url = f"https://www.monster.com/jobs/search/?where={location}"
-    else:
-        html_url = f"https://www.monster.com/jobs/search/?q={job}"
-    return html_url
-
-
 @click.command(help="Look for jobs in America from monster.com.")
 @click.option("-j", "--job", type=str,
               help="The job that you are looking for")
@@ -86,8 +74,7 @@ def main(job, location, go, description, show, clear):
     elif description:
         click.echo(get_description(description))
     elif job or location:
-        html_url = get_url(job, location)
-        html_text = requests.get(html_url).text
+        html_text = requests.get("https://www.monster.com/jobs/search", params={'q': job, 'where': location}).text
         soup = BeautifulSoup(html_text, "html.parser")
         if check(soup):
             get_jobs(soup)
@@ -100,6 +87,3 @@ def main(job, location, go, description, show, clear):
 
 if __name__ == "__main__":
     main()
-
-
-# learn to work with click better for mutually exclusive commands
